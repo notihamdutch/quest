@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . /app
 
+ENV SECRET_WORD=TwelveFactor
+
 EXPOSE 3000
 
 CMD [ "npm", "start" ]
