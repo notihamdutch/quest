@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFormation template for creating a task definition"
+Resources:
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: quest-app-cluster
+  MyTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities:
+        - "FARGATE"
+      ExecutionRoleArn: "arn:aws:iam::072859661869:role/ecsTaskExecutionRole"
+      Cpu: 256
+      Memory: 512
+      NetworkMode: "awsvpc"
+      ContainerDefinitions:
+        - Name: "quest-app"
+          Image: "072859661869.dkr.ecr.us-east-1.amazonaws.com/quest-app:latest"
+          MemoryReservation: 256
+          Memory: 512
+          PortMappings:
+            - ContainerPort: 3000
+              Protocol: tcp
+  FargateAlb:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      Name: FargateAlb
+      Subnets:
+        - subnet-082048fddf767d4a1
+        - subnet-0bb90ad3420da2ffc
+        - subnet-05e7696fc0723b980
+      Type: application
+      SecurityGroups:
+        - !GetAtt FargateAlbSG.GroupId
+  MyFargateTargetGroup:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      Name: MyFargateTargetGroup
+      VpcId: vpc-0d87e8f0f823f9c50
+      Protocol: HTTP
+      Port: 3000
+      HealthCheckPath: /
+      TargetType: ip
+  Listener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref MyFargateTargetGroup
+          Type: forward
+      LoadBalancerArn: !Ref FargateAlb
+      Port: 80
+      Protocol: HTTP
+  FargateAlbSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for the Fargate ALB
+      GroupName: FargateAlbSG
+      SecurityGroupIngress:
+        - CidrIpv6: ::/0
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: TCP
+          Description: 'Inbound rule for IPv6 traffic'
+        - CidrIp: 0.0.0.0/0
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: TCP
+          Description: 'Inbound rule for IPv4 traffic'
+  Alb2FargateContainers:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for traffic between ALB and containers
+      GroupName: Alb2FargateContainers
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          SourceSecurityGroupId: !GetAtt FargateAlbSG.GroupId
+          Description: 'Inbound rule for all traffic'
+  MyECSService:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - Listener
+    Properties:
+      LaunchType: FARGATE
+      Cluster:
+        Ref: "ECSCluster"
+      DesiredCount: 2
+      TaskDefinition:
+        Ref: "MyTaskDefinition"
+      DeploymentConfiguration:
+        MaximumPercent: 100
+        MinimumHealthyPercent: 0
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - !GetAtt Alb2FargateContainers.GroupId
+          Subnets: ['subnet-082048fddf767d4a1','subnet-0bb90ad3420da2ffc','subnet-05e7696fc0723b980']
+      LoadBalancers:
+        - TargetGroupArn:
+            Ref: MyFargateTargetGroup
+          ContainerPort: 3000
+          ContainerName: quest-app
