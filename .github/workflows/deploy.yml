@@ -40,3 +40,4 @@ jobs:
       with:
         name: quest-app
         template: testing.yml
+        no-fail-on-empty-changeset: "1"
