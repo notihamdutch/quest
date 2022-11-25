@@ -24,8 +24,8 @@ jobs:
         aws-region: us-east-1
 
   Deploy-clf:
-    - name: Deploy to AWS CloudFormation
       needs: Login-Build-Push
+    - name: Deploy to AWS CloudFormation
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: quest-app
