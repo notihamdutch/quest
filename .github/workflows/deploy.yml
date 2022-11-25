@@ -23,9 +23,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-     - name: Deploy to AWS CloudFormation
-       uses: aws-actions/aws-cloudformation-github-deploy@v1
-       with:
+    - name: Deploy to AWS CloudFormation
+      uses: aws-actions/aws-cloudformation-github-deploy@v1
+      with:
         name: quest-app
         template: testing.yml
 
