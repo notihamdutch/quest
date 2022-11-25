@@ -24,7 +24,7 @@ jobs:
         aws-region: us-east-1
 
     -shell: pwsh
-     run: Install-Module -Name AWS.Tools.CloudFormation -Force
+    -run: Install-Module -Name AWS.Tools.CloudFormation -Force
     -run: pwsh -File deploy_script.ps1
 
     - name: Login to Amazon ECR
