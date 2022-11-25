@@ -23,9 +23,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - shell: pwsh
-      run: Install-Module -Name AWS.Tools.CloudFormation -Force
-    - run: pwsh -File deploy_script.ps1
+     - name: Deploy to AWS CloudFormation
+       uses: aws-actions/aws-cloudformation-github-deploy@v1
+       with:
+        name: quest-app
+        template: testing.yml
 
     - name: Login to Amazon ECR
       id: login-ecr
