@@ -20,7 +20,7 @@ Resources:
           MemoryReservation: 256
           Memory: 512
           PortMappings:
-            - ContainerPort: 300
+            - ContainerPort: 3000
               Protocol: tcp
   FargateAlb:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
@@ -39,7 +39,7 @@ Resources:
       Name: MyFargateTargetGroup
       VpcId: vpc-0d87e8f0f823f9c50
       Protocol: HTTP
-      Port: 300
+      Port: 3000
       HealthCheckPath: /
       TargetType: ip
   Listener:
@@ -99,5 +99,5 @@ Resources:
       LoadBalancers:
         - TargetGroupArn:
             Ref: MyFargateTargetGroup
-          ContainerPort: 300
+          ContainerPort: 3000
           ContainerName: quest-app
