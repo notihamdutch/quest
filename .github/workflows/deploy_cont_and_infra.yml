@@ -28,7 +28,7 @@ jobs:
     - name: Deploy to AWS CloudFormation
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
-        name: quest_app-ecr
+        name: quest-app-ecr
         template: infra/ecr_deploy.yml
         no-fail-on-empty-changeset: "1"
 
