@@ -24,7 +24,14 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::072859661869:role/oidc-deploy
         aws-region: us-east-1
-  
+
+    - name: Deploy to AWS CloudFormation
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: quest-app
+          template: infra/ecr_deploy.yml
+          no-fail-on-empty-changeset: "1"
+
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
