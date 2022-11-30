@@ -5,4 +5,4 @@ Resources:
   MyRepository: 
     Type: AWS::ECR::Repository
     Properties: 
-      RepositoryName: "quest-app"
+      RepositoryName: "quest-app-repo"
