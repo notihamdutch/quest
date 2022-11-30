@@ -27,11 +27,11 @@ jobs:
         aws-region: us-east-1      
 
     - name: Deploy to AWS CloudFormation
-        uses: aws-actions/aws-cloudformation-github-deploy@v1
-        with:
-          name: quest-app
-          template: infra/ecr_deploy.yml
-          no-fail-on-empty-changeset: "1"
+      uses: aws-actions/aws-cloudformation-github-deploy@v1
+      with:
+        name: quest-app
+        template: infra/ecr_deploy.yml
+        no-fail-on-empty-changeset: "1"
 
     - name: Deploy to AWS CloudFormation
       uses: aws-actions/aws-cloudformation-github-deploy@v1
