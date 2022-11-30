@@ -13,3 +13,4 @@ ENV SECRET_WORD=TwelveFacto
 EXPOSE 3000
 
 CMD [ "npm", "start" ]
+
