@@ -1,10 +1,85 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "CloudFormation template for creating a task definition"
 Resources:
+  
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: '10.0.0.0/16'
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: quest vpc
+
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: '10.0.0.0/20'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Subnet 1
+      VpcId: !Ref VPC         
+
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: '10.0.32.0/20'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Subnet 2
+      VpcId: !Ref VPC
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: quest IGW  
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Public Route Table
+      VpcId: !Ref VPC
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref Subnet1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref Subnet2
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable   
+  
   ECSCluster:
     Type: 'AWS::ECS::Cluster'
     Properties:
       ClusterName: quest-app-cluster
+  
   MyTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -22,26 +97,28 @@ Resources:
           PortMappings:
             - ContainerPort: 3000
               Protocol: tcp
+  
   FargateAlb:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:
       Name: FargateAlb
       Subnets:
-        - subnet-082048fddf767d4a1
-        - subnet-0bb90ad3420da2ffc
-        - subnet-05e7696fc0723b980
+        - !Ref Subnet1
+        - !Ref Subnet2
       Type: application
       SecurityGroups:
         - !GetAtt FargateAlbSG.GroupId
+  
   MyFargateTargetGroup:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
     Properties:
       Name: MyFargateTargetGroup
-      VpcId: vpc-0d87e8f0f823f9c50
+      VpcId: !Ref VPC
       Protocol: HTTP
       Port: 3000
       HealthCheckPath: /
       TargetType: ip
+  
   Listener:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
     Properties:
@@ -51,6 +128,7 @@ Resources:
       LoadBalancerArn: !Ref FargateAlb
       Port: 80
       Protocol: HTTP
+  
   FargateAlbSG:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -67,6 +145,7 @@ Resources:
           ToPort: 80
           IpProtocol: TCP
           Description: 'Inbound rule for IPv4 traffic'
+  
   Alb2FargateContainers:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -76,6 +155,7 @@ Resources:
         - IpProtocol: -1
           SourceSecurityGroupId: !GetAtt FargateAlbSG.GroupId
           Description: 'Inbound rule for all traffic'
+  
   MyECSService:
     Type: AWS::ECS::Service
     DependsOn:
@@ -95,7 +175,9 @@ Resources:
           AssignPublicIp: ENABLED
           SecurityGroups:
             - !GetAtt Alb2FargateContainers.GroupId
-          Subnets: ['subnet-082048fddf767d4a1','subnet-0bb90ad3420da2ffc','subnet-05e7696fc0723b980']
+          Subnets: 
+            - !Ref Subnet1
+            - !Ref Subnet2
       LoadBalancers:
         - TargetGroupArn:
             Ref: MyFargateTargetGroup
