@@ -102,6 +102,8 @@ Resources:
   FargateAlb:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:
+    DependsOn:
+      - "InternetGatewayAttachment"
       Name: FargateAlb
       Subnets:
         - !Ref Subnet1
