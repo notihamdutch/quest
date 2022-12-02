@@ -162,7 +162,7 @@ Resources:
       LaunchType: FARGATE
       Cluster:
         Ref: "ECSCluster"
-      DesiredCount: 2
+      DesiredCount: 1
       TaskDefinition:
         Ref: "MyTaskDefinition"
       DeploymentConfiguration:
