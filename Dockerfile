@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . /app
 
-ENV SECRET_WORD=TwelveFacto
+ENV SECRET_WORD=TwelveFactor
 
 EXPOSE 3000
 
