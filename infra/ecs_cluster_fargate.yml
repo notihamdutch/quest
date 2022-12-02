@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "CloudFormation template for creating fargate cluster"
+
 Resources:  
   
   ECSCluster:
@@ -40,7 +41,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
     Properties:
       Name: MyFargateTargetGroup
-      VpcId: !Ref VPC
+      VpcId: !ImportValue VPC
       Protocol: HTTP
       Port: 3000
       HealthCheckPath: /
