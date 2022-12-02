@@ -48,6 +48,13 @@ jobs:
     - name: Deploy to AWS CloudFormation
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
+        name: vpc
+        template: infra/vpc.yml
+        no-fail-on-empty-changeset: "1"
+
+    - name: Deploy to AWS CloudFormation
+      uses: aws-actions/aws-cloudformation-github-deploy@v1
+      with:
         name: quest-app
-        template: infra/testing.yml
+        template: infra/ecs_cluster_fargate.yml
         no-fail-on-empty-changeset: "1"

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "CloudFormation template for creating a task definition"
+Description: "CloudFormation template for creating repository"
 
 Resources:
   MyRepository: 
